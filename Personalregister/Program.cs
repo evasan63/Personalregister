@@ -5,23 +5,22 @@ namespace Personalregister
     // ---------------------------------------------------------
     // This class represents an employee with a name and salary.
     // ---------------------------------------------------------
-    class Anställd
+    class Employee
     {
-        public string Namn { get; }
-        public int Lön { get; }
+        public string Name { get; }
+        public int Salary { get; set; }
 
         // Methods
-        public Anställd(string namn, int lön)
+        public Employee(string name, int salary)
         {
-            Namn = namn;
-            Lön = lön;
+            Name = name;
+            Salary = salary;
         }
     }
 
     class Program
     {
-        // Lista med anställda (ingen persistent lagring krävs).
-        static readonly List<Anställd> register = new List<Anställd>();
+        static List<Employee> register = new List<Employee>();
 
         static void Main()
         {
@@ -33,18 +32,22 @@ namespace Personalregister
                 Console.WriteLine("**** Personalregister ****");
                 Console.WriteLine("1. Lägg till anställd");
                 Console.WriteLine("2. Skriv ut register");
-                Console.WriteLine("3. Avsluta");
+                Console.WriteLine("3. Justera lönen");
+                Console.WriteLine("4. Avsluta");
                 Console.Write("Välj alternativ: ");
 
                 switch (Console.ReadLine()?.Trim())
                 {
                     case "1":
-                        AddAnställd();
+                        AddEmployee();
                         break;
                     case "2":
                         PrintRegister();
                         break;
                     case "3":
+                        AdjustSalary();
+                        break;
+                    case "4":
                         running = false;
                         break;
                     default:
@@ -56,43 +59,47 @@ namespace Personalregister
             Console.WriteLine("Programmet avslutas.");
         }
 
-        // -------------------------------------------------
-        // This method adds a new employee to the register.
-        // -------------------------------------------------
-        static void AddAnställd()
+        // -----------------------------------------------------------
+        // The method AddEmployee adds a new employee to the register.
+        // -----------------------------------------------------------
+        static void AddEmployee()
         {
-            string namn;
+            string name;
             while (true)
             {
-                Console.Write("Namn: ");
-                namn = Console.ReadLine();
-                if (!string.IsNullOrEmpty(namn)) break;
+                Console.Write("Name: ");
+                name = Console.ReadLine();
+
+                if (!string.IsNullOrEmpty(name)) break;
                 Console.WriteLine("Namnet får inte vara tomt.");
             }
 
-            int lön;
+            int salary;
             while (true)
             {
-                Console.Write("Lön (kr): ");
+                Console.Write("Månadslön (kr): ");
 
                 string input = Console.ReadLine().Trim();
 
-                lön = Convert.ToInt32(input);
+                salary = Convert.ToInt32(input);
 
-                if (lön > 0)
+                if (salary <= 0)
+                {
+                    Console.WriteLine("Ange ett giltigt belopp > 0");
+                }
+                else
                 {
                     break;
                 }
-                Console.WriteLine("Ange ett giltigt belopp > 0");
             }
 
-            register.Add(new Anställd(namn, lön));
-            Console.WriteLine($"{namn} har lagts till i personalregistret.");
+            register.Add(new Employee(name, salary));
+            Console.WriteLine($"{name} har lagts till i personalregistret.");
         }
 
-        // --------------------------------------------------
-        // This method prints the contents of the register.
-        // --------------------------------------------------
+        // ---------------------------------------------------------------------
+        // The method PrintRegister prints the contents of the personalregister.
+        // ---------------------------------------------------------------------
         static void PrintRegister()
         {
             Console.WriteLine();
@@ -101,19 +108,65 @@ namespace Personalregister
                 Console.WriteLine("Personalregistret är tomt.");
                 return;
             }
-            else 
+            else
             {
                 Console.WriteLine($"Antal anställda: {register.Count}");
             }
 
-            Console.WriteLine($"{"Namn",-25}{"Lön",10}");
+            Console.WriteLine($"{"Name",-25}{"Månadslön",10}");
             Console.WriteLine(new string('-', 40));
 
             foreach (var i in register)
 
             {
-                Console.WriteLine($"{ i.Namn,-25}{ i.Lön + " kr", 15}");
+                Console.WriteLine($"{i.Name,-25}{i.Salary + " kr",15}");
             }
+        }
+
+        // -----------------------------------------------------------
+        // The method AdjustSalary sets a new salay for given name.
+        // -----------------------------------------------------------
+        static void AdjustSalary()
+        {
+            string name;
+            while (true)
+            {
+                Console.Write("Name: ");
+                name = Console.ReadLine();
+
+                if (!string.IsNullOrEmpty(name)) break;
+                Console.WriteLine("Namnet får inte vara tomt.");
+            }
+
+            // Make sure the name exists in the register (case-insensitive)
+            var index = register.IndexOf(
+                register.Find(e => e.Name.Equals(name, StringComparison.OrdinalIgnoreCase)));
+
+            if (index == -1)
+            {
+                Console.WriteLine($"Anställd med namnet {name} hittades inte.");
+                return;
+            }
+
+            int newSalary;
+            while (true)
+            {
+                Console.Write("Ange ny månadslön (kr): ");
+                string input = Console.ReadLine().Trim();
+
+                newSalary = Convert.ToInt32(input);
+                if (newSalary <= 0)
+                {
+                    Console.WriteLine("Ange ett giltigt belopp > 0");
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            register[index].Salary = newSalary;
+            Console.WriteLine($"{name} har fått lönen justerad, ny lön: {newSalary} kr.");
         }
     }
 }
